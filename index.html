@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AI眼健康五维评估报告</title>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -56,7 +55,6 @@ body {
   fill: none;
   stroke-width: 12;
   stroke-linecap: round;
-  transition: stroke-dashoffset 2s cubic-bezier(0.33, 1, 0.68, 1);
 }
 .score-text {
   position: absolute;
@@ -84,12 +82,12 @@ body {
   font-size: 16px;
   font-weight: 600;
   opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.6s ease;
+  transform: translateY(10px) scale(0.8);
 }
 .rating-badge.show {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* 对比信息 */
@@ -102,33 +100,46 @@ body {
   color: #38BDF8;
   font-weight: 500;
   opacity: 0;
-  transition: opacity 0.8s ease 0.5s;
 }
-.compare-info .beat.show { opacity: 1; }
+.compare-info .beat.show {
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
 .compare-info .change {
   color: #4ADE80;
   font-weight: 500;
   margin-top: 4px;
   opacity: 0;
-  transition: opacity 0.8s ease 0.8s;
 }
-.compare-info .change.show { opacity: 1; }
+.compare-info .change.show {
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
 
 /* 雷达图 */
 .radar-section {
   margin-bottom: 20px;
   opacity: 0;
-  transition: opacity 1s ease;
+  transition: opacity 0.8s ease;
 }
 .radar-section.show { opacity: 1; }
-#radarChart { width: 100%; height: 280px; }
+#radarCanvas {
+  width: 100%;
+  height: 280px;
+  display: block;
+}
 
 /* 进度条 */
-.bars-section {
-  margin-bottom: 20px;
-}
+.bars-section { margin-bottom: 20px; }
 .bar-item {
   margin-bottom: 12px;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.bar-item.show {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.4s ease;
 }
 .bar-header {
   display: flex;
@@ -137,8 +148,7 @@ body {
   margin-bottom: 6px;
 }
 .bar-name { font-size: 13px; color: #CBD5E1; }
-.bar-score { font-size: 14px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
-.bar-score.show { opacity: 1; }
+.bar-score { font-size: 14px; font-weight: 600; }
 .bar-track {
   height: 10px;
   background: #334155;
@@ -149,7 +159,6 @@ body {
   height: 100%;
   border-radius: 5px;
   width: 0%;
-  transition: width 1s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 /* AI洞察 */
@@ -160,11 +169,11 @@ body {
   padding: 16px;
   opacity: 0;
   transform: translateY(20px);
-  transition: all 0.8s ease;
 }
 .insight-section.show {
   opacity: 1;
   transform: translateY(0);
+  transition: all 0.6s ease;
 }
 .insight-title {
   font-size: 14px;
@@ -179,12 +188,12 @@ body {
   border-bottom: 1px solid #334155;
   opacity: 0;
   transform: translateX(-10px);
-  transition: all 0.5s ease;
 }
 .insight-item:last-child { border-bottom: none; }
 .insight-item.show {
   opacity: 1;
   transform: translateX(0);
+  transition: all 0.4s ease;
 }
 
 /* 底部品牌 */
@@ -244,44 +253,44 @@ body {
   </div>
 
   <div class="radar-section" id="radarSection">
-    <div id="radarChart"></div>
+    <canvas id="radarCanvas"></canvas>
   </div>
 
   <div class="bars-section" id="barsSection">
-    <div class="bar-item">
+    <div class="bar-item" id="barItem0">
       <div class="bar-header">
         <span class="bar-name">视力清晰度</span>
-        <span class="bar-score" id="score0">78</span>
+        <span class="bar-score" id="scoreLabel0">78</span>
       </div>
-      <div class="bar-track"><div class="bar-fill" id="bar0" style="background: #FBBF24;"></div></div>
+      <div class="bar-track"><div class="bar-fill" id="barFill0" style="background: #FBBF24;"></div></div>
     </div>
-    <div class="bar-item">
+    <div class="bar-item" id="barItem1">
       <div class="bar-header">
         <span class="bar-name">屈光状态</span>
-        <span class="bar-score" id="score1">82</span>
+        <span class="bar-score" id="scoreLabel1">82</span>
       </div>
-      <div class="bar-track"><div class="bar-fill" id="bar1" style="background: #4ADE80;"></div></div>
+      <div class="bar-track"><div class="bar-fill" id="barFill1" style="background: #4ADE80;"></div></div>
     </div>
-    <div class="bar-item">
+    <div class="bar-item" id="barItem2">
       <div class="bar-header">
         <span class="bar-name">眼底健康</span>
-        <span class="bar-score" id="score2">91</span>
+        <span class="bar-score" id="scoreLabel2">91</span>
       </div>
-      <div class="bar-track"><div class="bar-fill" id="bar2" style="background: #4ADE80;"></div></div>
+      <div class="bar-track"><div class="bar-fill" id="barFill2" style="background: #4ADE80;"></div></div>
     </div>
-    <div class="bar-item">
+    <div class="bar-item" id="barItem3">
       <div class="bar-header">
         <span class="bar-name">用眼负荷</span>
-        <span class="bar-score" id="score3">55</span>
+        <span class="bar-score" id="scoreLabel3">55</span>
       </div>
-      <div class="bar-track"><div class="bar-fill" id="bar3" style="background: #F87171;"></div></div>
+      <div class="bar-track"><div class="bar-fill" id="barFill3" style="background: #F87171;"></div></div>
     </div>
-    <div class="bar-item">
+    <div class="bar-item" id="barItem4">
       <div class="bar-header">
         <span class="bar-name">未来风险</span>
-        <span class="bar-score" id="score4">85</span>
+        <span class="bar-score" id="scoreLabel4">85</span>
       </div>
-      <div class="bar-track"><div class="bar-fill" id="bar4" style="background: #4ADE80;"></div></div>
+      <div class="bar-track"><div class="bar-fill" id="barFill4" style="background: #4ADE80;"></div></div>
     </div>
   </div>
 
@@ -311,180 +320,285 @@ const dimensions = [
   { name: '未来风险', score: 85, benchmark: 55, color: '#4ADE80' },
 ];
 
-const circumference = 2 * Math.PI * 86; // 540.35
+const circumference = 2 * Math.PI * 86;
 
-// ========== 数字滚动 ==========
-function animateNumber(target, duration = 2000) {
-  const el = document.getElementById('scoreNumber');
-  const start = Date.now();
-  function tick() {
-    const t = Math.min((Date.now() - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 3);
-    el.textContent = Math.round(eased * target);
-    if (t < 1) requestAnimationFrame(tick);
-  }
-  tick();
-}
+// ========== 缓动函数 ==========
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
-// ========== 圆环进度 ==========
-function animateRing(targetScore) {
-  const circle = document.getElementById('progressCircle');
-  const ratio = targetScore / 100;
-  const offset = circumference * (1 - ratio);
-  setTimeout(() => {
-    circle.style.strokeDashoffset = offset;
-  }, 100);
-}
+// ========== 动画状态机 ==========
+let animFrame = null;
+let startTime = null;
+const PHASES = {
+  SCORE_ROLL:   { start: 0,    end: 2000 },   // 数字滚动 + 圆环画满
+  RATING_POP:   { start: 2200, end: 2800 },   // 评级弹出
+  COMPARE_SHOW: { start: 3000, end: 3800 },   // 击败% + 进步对比依次显示
+  RADAR_DRAW:   { start: 3500, end: 5500 },   // 雷达图从中心展开
+  BARS_FILL:    { start: 5500, end: 8000 },   // 进度条逐个填充
+  INSIGHT_SHOW: { start: 8200, end: 9500 },   // AI洞察一条条浮现
+};
 
-// ========== 雷达图 ==========
-let radarChart;
-function initRadar() {
-  radarChart = echarts.init(document.getElementById('radarChart'));
-  const option = {
-    backgroundColor: 'transparent',
-    radar: {
-      indicator: dimensions.map(d => ({ name: d.name, max: 100 })),
-      center: ['50%', '50%'],
-      radius: '65%',
-      axisName: { color: '#CBD5E1', fontSize: 11 },
-      splitArea: { areaStyle: { color: 'transparent' } },
-      splitLine: { lineStyle: { color: '#334155' } },
-      axisLine: { lineStyle: { color: '#334155' } },
-      splitNumber: 5,
-    },
-    series: [{
-      type: 'radar',
-      data: [
-        {
-          value: dimensions.map(() => 0),
-          name: '同龄人平均',
-          symbol: 'circle',
-          symbolSize: 4,
-          lineStyle: { color: '#64748B', width: 1.5 },
-          areaStyle: { color: 'rgba(100,116,139,0.1)' },
-          itemStyle: { color: '#64748B' }
-        },
-        {
-          value: dimensions.map(() => 0),
-          name: '您的评分',
-          symbol: 'circle',
-          symbolSize: 6,
-          lineStyle: { color: '#38BDF8', width: 2.5 },
-          areaStyle: { color: 'rgba(56,189,248,0.2)' },
-          itemStyle: { color: '#38BDF8', borderColor: '#0F172A', borderWidth: 2 }
-        }
-      ],
-      animationDuration: 2000,
-      animationEasing: 'cubicOut'
-    }],
-    legend: {
-      data: ['同龄人平均', '您的评分'],
-      bottom: 0,
-      textStyle: { color: '#94A3B8', fontSize: 10 },
-      itemWidth: 12,
-      itemHeight: 8
-    }
-  };
-  radarChart.setOption(option);
-
-  // 动画到真实值
-  setTimeout(() => {
-    radarChart.setOption({
-      series: [{
-        data: [
-          { value: dimensions.map(d => d.benchmark), name: '同龄人平均' },
-          { value: dimensions.map(d => d.score), name: '您的评分' }
-        ]
-      }]
-    });
-  }, 1500);
-}
-
-// ========== 进度条 ==========
-function animateBars() {
-  dimensions.forEach((d, i) => {
-    setTimeout(() => {
-      document.getElementById('bar' + i).style.width = d.score + '%';
-      document.getElementById('score' + i).classList.add('show');
-    }, 2000 + i * 300);
-  });
-}
-
-// ========== 评级/对比/洞察 ==========
-function showExtras() {
-  setTimeout(() => document.getElementById('ratingBadge').classList.add('show'), 2200);
-  setTimeout(() => document.getElementById('beatText').classList.add('show'), 2600);
-  setTimeout(() => document.getElementById('changeText').classList.add('show'), 2900);
-  setTimeout(() => document.getElementById('radarSection').classList.add('show'), 1200);
-  setTimeout(() => document.getElementById('insightSection').classList.add('show'), 3800);
-
-  [0,1,2].forEach(i => {
-    setTimeout(() => {
-      document.getElementById('insight' + i).classList.add('show');
-    }, 4000 + i * 200);
-  });
-}
-
-// ========== 重播 ==========
-function replay() {
-  // 重置所有
+function resetAll() {
+  // 数字
   document.getElementById('scoreNumber').textContent = '0';
+  // 圆环
   document.getElementById('progressCircle').style.strokeDashoffset = circumference;
+  // 评级
   document.getElementById('ratingBadge').classList.remove('show');
+  // 对比
   document.getElementById('beatText').classList.remove('show');
   document.getElementById('changeText').classList.remove('show');
+  // 雷达
   document.getElementById('radarSection').classList.remove('show');
-  document.getElementById('insightSection').classList.remove('show');
+  radarProgress = 0;
+  // 进度条
   dimensions.forEach((d, i) => {
-    document.getElementById('bar' + i).style.width = '0%';
-    document.getElementById('score' + i).classList.remove('show');
+    document.getElementById('barItem' + i).classList.remove('show');
+    document.getElementById('barFill' + i).style.width = '0%';
   });
+  // 洞察
+  document.getElementById('insightSection').classList.remove('show');
   [0,1,2].forEach(i => document.getElementById('insight' + i).classList.remove('show'));
+}
 
-  // 重新动画
-  if (radarChart) {
-    radarChart.setOption({
-      series: [{
-        data: [
-          { value: dimensions.map(() => 0), name: '同龄人平均' },
-          { value: dimensions.map(() => 0), name: '您的评分' }
-        ]
-      }]
+// ========== 雷达图（Canvas 手绘，逐帧控制） ==========
+let radarCanvas, radarCtx;
+let radarProgress = 0; // 0 ~ 1
+
+function initRadarCanvas() {
+  radarCanvas = document.getElementById('radarCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = radarCanvas.getBoundingClientRect();
+  radarCanvas.width = rect.width * dpr;
+  radarCanvas.height = rect.height * dpr;
+  radarCtx = radarCanvas.getContext('2d');
+  radarCtx.scale(dpr, dpr);
+}
+
+function drawRadarCanvas(progress) {
+  const ctx = radarCtx;
+  const W = radarCanvas.width / (window.devicePixelRatio || 1);
+  const H = radarCanvas.height / (window.devicePixelRatio || 1);
+  const cx = W / 2;
+  const cy = H / 2 - 10;
+  const R = Math.min(W, H) * 0.35;
+  const N = dimensions.length;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // 网格线
+  for (let level = 1; level <= 5; level++) {
+    ctx.beginPath();
+    const r = R * level / 5;
+    for (let i = 0; i <= N; i++) {
+      const angle = -Math.PI / 2 + (i / N) * Math.PI * 2;
+      const x = cx + Math.cos(angle) * r;
+      const y = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
+
+  // 轴线
+  for (let i = 0; i < N; i++) {
+    const angle = -Math.PI / 2 + (i / N) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(angle) * R, cy + Math.sin(angle) * R);
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
+
+  // 标签
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < N; i++) {
+    const angle = -Math.PI / 2 + (i / N) * Math.PI * 2;
+    const labelR = R + 22;
+    const lx = cx + Math.cos(angle) * labelR;
+    const ly = cy + Math.sin(angle) * labelR;
+    ctx.fillStyle = '#CBD5E1';
+    ctx.fillText(dimensions[i].name, lx, ly);
+  }
+
+  // 刻度值
+  ctx.font = '9px -apple-system, sans-serif';
+  ctx.fillStyle = '#64748B';
+  [20, 40, 60, 80, 100].forEach(v => {
+    const r = R * v / 100;
+    ctx.fillText(String(v), cx + 4, cy - r + 2);
+  });
+
+  // 同龄人基准（灰色虚线）
+  ctx.beginPath();
+  for (let i = 0; i <= N; i++) {
+    const idx = i % N;
+    const angle = -Math.PI / 2 + (i / N) * Math.PI * 2;
+    const r = R * dimensions[idx].benchmark / 100;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = 'rgba(100,116,139,0.5)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 用户雷达图（按进度展开）
+  if (progress > 0) {
+    const eased = easeOutCubic(progress);
+    const points = [];
+    for (let i = 0; i < N; i++) {
+      const angle = -Math.PI / 2 + (i / N) * Math.PI * 2;
+      const r = R * (dimensions[i].score / 100) * eased;
+      points.push({
+        x: cx + Math.cos(angle) * r,
+        y: cy + Math.sin(angle) * r,
+        val: dimensions[i].score,
+        angle: angle,
+        finalR: R * dimensions[i].score / 100
+      });
+    }
+
+    // 填充
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(56,189,248,0.15)';
+    ctx.fill();
+
+    // 边线
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = '#38BDF8';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 顶点 + 标注
+    points.forEach((p, i) => {
+      // 点
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#0F172A';
+      ctx.fill();
+      ctx.strokeStyle = '#38BDF8';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // 分数标注（进度>0.7时显示）
+      if (progress > 0.7) {
+        const labelAlpha = Math.min((progress - 0.7) / 0.3, 1);
+        const offset = p.val > 80 ? -12 : 14;
+        ctx.globalAlpha = labelAlpha;
+        ctx.font = 'bold 11px -apple-system, sans-serif';
+        ctx.fillStyle = p.val >= 80 ? '#4ADE80' : p.val >= 60 ? '#FBBF24' : '#F87171';
+        ctx.fillText(String(p.val), p.x, p.y + offset);
+        ctx.globalAlpha = 1;
+      }
+    });
+  }
+}
+
+// ========== 主动画循环 ==========
+function animate() {
+  const now = Date.now();
+  const elapsed = now - startTime;
+
+  // 阶段0: 数字滚动 + 圆环画满 (0~2000ms)
+  if (elapsed < PHASES.SCORE_ROLL.end) {
+    const t = Math.min(elapsed / PHASES.SCORE_ROLL.end, 1);
+    const eased = easeOutCubic(t);
+    document.getElementById('scoreNumber').textContent = Math.round(eased * overallScore);
+    const offset = circumference * (1 - eased * overallScore / 100);
+    document.getElementById('progressCircle').style.strokeDashoffset = offset;
+  }
+
+  // 阶段1: 评级弹出 (2200~2800ms)
+  if (elapsed >= PHASES.RATING_POP.start && elapsed < PHASES.RATING_POP.end) {
+    document.getElementById('ratingBadge').classList.add('show');
+  }
+
+  // 阶段2: 对比信息 (3000~3800ms)
+  if (elapsed >= 3000) {
+    document.getElementById('beatText').classList.add('show');
+  }
+  if (elapsed >= 3400) {
+    document.getElementById('changeText').classList.add('show');
+  }
+
+  // 阶段3: 雷达图展开 (3500~5500ms)
+  if (elapsed >= PHASES.RADAR_DRAW.start) {
+    document.getElementById('radarSection').classList.add('show');
+    const radarT = Math.min((elapsed - PHASES.RADAR_DRAW.start) / (PHASES.RADAR_DRAW.end - PHASES.RADAR_DRAW.start), 1);
+    radarProgress = radarT;
+    drawRadarCanvas(radarT);
+  }
+
+  // 阶段4: 进度条逐个填充 (5500~8000ms)
+  if (elapsed >= PHASES.BARS_FILL.start) {
+    const barDuration = 450; // 每条填充时间
+    const barDelay = 350;    // 间隔
+    dimensions.forEach((d, i) => {
+      const barStart = PHASES.BARS_FILL.start + i * barDelay;
+      if (elapsed >= barStart) {
+        // 显示整行
+        document.getElementById('barItem' + i).classList.add('show');
+        // 填充宽度
+        const localT = Math.min((elapsed - barStart) / barDuration, 1);
+        const eased = easeOutCubic(localT);
+        document.getElementById('barFill' + i).style.width = (d.score * eased) + '%';
+      }
     });
   }
 
-  setTimeout(() => {
-    animateNumber(overallScore);
-    animateRing(overallScore);
-    showExtras();
-    animateBars();
-    if (radarChart) {
-      setTimeout(() => {
-        radarChart.setOption({
-          series: [{
-            data: [
-              { value: dimensions.map(d => d.benchmark), name: '同龄人平均' },
-              { value: dimensions.map(d => d.score), name: '您的评分' }
-            ]
-          }]
-        });
-      }, 500);
+  // 阶段5: AI洞察 (8200~9500ms)
+  if (elapsed >= 8200) {
+    document.getElementById('insightSection').classList.add('show');
+  }
+  [0, 1, 2].forEach(i => {
+    if (elapsed >= 8400 + i * 400) {
+      document.getElementById('insight' + i).classList.add('show');
     }
-  }, 300);
+  });
+
+  if (elapsed < 10000) {
+    animFrame = requestAnimationFrame(animate);
+  }
+}
+
+function startAnimation() {
+  resetAll();
+  startTime = Date.now();
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animFrame = requestAnimationFrame(animate);
+}
+
+function replay() {
+  startAnimation();
 }
 
 // ========== 初始化 ==========
 window.onload = function() {
-  initRadar();
-  animateNumber(overallScore);
-  animateRing(overallScore);
-  showExtras();
-  animateBars();
+  initRadarCanvas();
+  startAnimation();
 };
 
-// 响应式
 window.addEventListener('resize', () => {
-  if (radarChart) radarChart.resize();
+  initRadarCanvas();
+  drawRadarCanvas(radarProgress);
 });
 </script>
 
